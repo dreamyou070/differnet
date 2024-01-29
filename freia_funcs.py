@@ -186,14 +186,14 @@ class Node:
             exec('self.out{0} = (self, {0})'.format(i))
 
     def build_modules(self, verbose=VERBOSE):
+        print(f'out node build modules ... ')
         ''' Returns a list with the dimension of each output of this node,
         recursively calling build_modules of the nodes connected to the input.
         Use this information to initialize the pytorch nn.Module of this node.
         '''
 
         if not self.input_dims:  # Only do it if this hasn't been computed yet
-            self.input_dims = [n.build_modules(verbose=verbose)[c]
-                               for n, c in self.inputs]
+            self.input_dims = [n.build_modules(verbose=verbose)[c] for n, c in self.inputs]
             try:
                 self.module = self.module_type(self.input_dims,
                                                **self.module_args)
@@ -352,11 +352,10 @@ class ReversibleGraphNet(nn.Module):
 
         # Recursively build the nodes nn.Modules and determine order of
         # operations
-        print(f'nf head, self.ind_in  (1) : {len(self.ind_in)}')
-        print(f'nf head, self.ind_out (1) : {len(self.ind_out)}')
         ops = []
         for i in self.ind_out:
-            node_list[i].build_modules(verbose=verbose)
+            print(f'i = {i} (because len of ind_out = 1 )')
+            node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
 
         # create list of Pytorch variables that are used
