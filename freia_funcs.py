@@ -193,8 +193,9 @@ class Node:
         '''
 
         if not self.input_dims:  # Only do it if this hasn't been computed yet
-            print(f'not input dims: {self.name}')
+
             self.input_dims = [n.build_modules(verbose=verbose)[c] for n, c in self.inputs]
+            print(f' *** {self.name} self.input_dims : {self.input_dims}')
             try:
                 self.module = self.module_type(self.input_dims,
                                                **self.module_args)
@@ -353,14 +354,13 @@ class ReversibleGraphNet(nn.Module):
         # Assign each node a unique ID
         self.node_list = node_list
         for i, n in enumerate(node_list):
-            print(f'id (0 ~ 17) : {i}')
             n.id = i
 
         # ----------------------------------------------------------------------------------------------------
         # Recursively build the nodes nn.Modules and determine order of operations : 17 operations
         ops = []
         for i in self.ind_out : # self.ind_out = [17
-            output_node = node_list[i]
+            print(f'build modules, i (only 17) : {i}')
             # ------------------------------------------------------------------------------------------------
             # build reverse module
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
