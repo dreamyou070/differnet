@@ -67,11 +67,18 @@ class DifferNet(nn.Module):
     def forward(self, x):
         y_cat = list()
 
+        # ------------------------------------------------------------------------------------------------------------
+        # (1) Alexnet
         for s in range(self.n_scales):
-            x_scaled = F.interpolate(x, size=self.img_size[0] // (2 ** s)) if s > 0 else x
+            # s = 0, 1, 2
+            x_scaled = F.interpolate(x,
+                                     size=self.img_size[0] // (2 ** s)) if s > 0 else x
+            # feature_extractor = alexnet
             feat_s = self.feature_extractor.features(x_scaled)
+            print(f'after {s} alexnet featuring, feat_s.shape (batch, channel, H,W) : {feat_s.shape}')
             y_cat.append(torch.mean(feat_s, dim=(2, 3)))
-
+        # ------------------------------------------------------------------------------------------------------------
+        # (2) nf head
         y = torch.cat(y_cat, dim=1)
         z = self.nf(y)
         return z
