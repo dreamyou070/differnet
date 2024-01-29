@@ -181,6 +181,8 @@ class Node:
         else:
             self.name = hex(id(self))[-6:]
         for i in range(255):
+            # from 0 to 254, the ascii characters
+            # self.out0 = (self, 0)
             exec('self.out{0} = (self, {0})'.format(i))
 
     def build_modules(self, verbose=VERBOSE):

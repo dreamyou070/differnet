@@ -32,15 +32,29 @@ def main(args):
     print(f' step 1. loading dataset')
     dataset_path = args.dataset_path
     class_name = args.class_name
-    train_set, test_set = load_datasets(dataset_path, class_name)
-    train_loader, test_loader = make_dataloaders(train_set, test_set)
+    args.img_dims = [3] + list(args.img_size)
+    train_set, test_set = load_datasets(dataset_path,
+                                        class_name,
+                                        args.n_transforms,
+                                        args.n_transforms_test,)
+    args.batch_size_test = args.batch_size * args.n_transforms // args.n_transforms_test
+    train_loader, test_loader = make_dataloaders(train_set, test_set, args.batch_size, args.batch_size_test)
 
     print(f' step 2. make model')
-    model = DifferNet()
+    args.n_feat = 256 * args.n_scales
+    model = DifferNet(n_scales=args.n_scales,                    # 3
+                      n_feat=args.n_feat,                        # 256 * 3
+                      n_coupling_blocks=args.n_coupling_blocks,  # 8
+                      clamp_alpha=args.clamp_alpha,              # 3
+                      fc_internal=args.fc_internal,              # 2048
+                      dropout=args.dropout)                      # 0.0
     model.to(args.device)
 
     print(f' step 3. optimizer')
-    optimizer = torch.optim.Adam(model.nf.parameters(), lr=c.lr_init, betas=(0.8, 0.8), eps=1e-04, weight_decay=1e-5)
+    """ train only nf """
+    optimizer = torch.optim.Adam(model.nf.parameters(),
+                                 lr=c.lr_init,
+                                 betas=(0.8, 0.8), eps=1e-04, weight_decay=1e-5)
 
     print(f' step 4. scoring object')
     score_obs = Score_Observer('AUROC')
@@ -55,16 +69,15 @@ def main(args):
             for i, data in enumerate(tqdm(train_loader, disable=args.hide_tqdm_bar)):
                 optimizer.zero_grad()
                 # 1) raw data
-                inputs, labels = data
-                inputs, labels = inputs.to(args.device), labels.to(args.device)
-                print(f'label: {labels} | input shape: {inputs.shape}')
-                inputs = inputs.view(-1, *inputs.shape[-3:])
-                print(f'after view, label: {labels} | input shape: {inputs.shape}')
+                inputs, labels = data                                           # normal label = 0
+                inputs, labels = inputs.to(args.device), labels.to(args.device) # input = batch, transform, 3, 448, 448
+                inputs = inputs.view(-1, *inputs.shape[-3:])                    # input = total_num,        3, 448, 448
 
                 # 2) make anomal data
                 inputs += torch.randn(*inputs.shape).cuda()
                 z = model(inputs)
 
+                # 3) get loss
                 #loss = get_loss(z, model.nf.jacobian(run_forward=False))
                 #train_loss.append(t2np(loss))
                 #loss.backward()
@@ -112,9 +125,37 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    # ------------------------------------------------------------------------------------------------------------------
+    # [1] data & transformation settings
     parser.add_argument('--dataset_path', type=str, default='dummy_dataset')
     parser.add_argument('--class_name', type=str, default='dummy_class')
+    parser.add_argument('--batch_size', type=int, default=24)
+    parser.add_argument('--n_transforms', type=int, default=4,
+                        help='per sample, number of transformations')
+    parser.add_argument('--n_transforms_test', type=int, default=64,
+                        help='per sample, number of transformations in test set')
+    parser.add_argument('--img_size', type=tuple, default=(448, 448))
+    parser.add_argument('--transf_rotations', action = 'store_true')
+    parser.add_argument('--degrees', type=int, default = 180)
+    parser.add_argument('--transf_brightness', type=float, default = 0.0)
+    parser.add_argument('--transf_contrast', type=float, default = 0.0)
+    parser.add_argument('--transf_saturation', type=float, default = 0.0)
+    parser.add_argument('--transf_hue', type=float, default = 0.0)
+    parser.add_argument('--norm_mean', type=float, default = [0.485, 0.456, 0.406])
+    parser.add_argument('--norm_std', type=float, default = [0.229, 0.224, 0.225])
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # [2] model
     parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--n_scales', type=int, default=3,
+            help='number of scales at which features are extracted, img_size is the highest - others are //2, //4,...')
+    parser.add_argument('--n_coupling_blocks', type=int, default=8)
+    parser.add_argument('--clamp_alpha', type=int, default=3)
+    parser.add_argument('--fc_internal', type=int, default=2048)
+    parser.add_argument('--dropout', type=float, default=0.0)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # [3] model
     parser.add_argument('--meta_epochs', type=int, default=24)
     parser.add_argument('--sub_epochs', type=int, default=8)
     parser.add_argument('--hide_tqdm_bar', action='store_true')

@@ -43,8 +43,11 @@ class DatasetFolderMultiTransform(DatasetFolder):
         self.fixed_degrees = [i * 360.0 / n_transforms for i in range(n_transforms)]
 
     def __getitem__(self, index):
+
         path, target = self.samples[index]
+
         sample = self.loader(path)
+
         if self.transform is not None:
             samples = list()
             for i in range(self.n_transforms):
@@ -53,13 +56,16 @@ class DatasetFolderMultiTransform(DatasetFolder):
                 else:
                     samples.append(self.transform(sample))
             samples = torch.stack(samples, dim=0)
+
         if self.target_transform is not None:
             target = self.target_transform(target)
+
         return samples, target
 
 
 class ImageFolderMultiTransform(DatasetFolderMultiTransform):
-    """Adapts class ImageFolder of PyTorch in a way that one sample can be transformed several times.
+    """
+    Adapts class ImageFolder of PyTorch in a way that one sample can be transformed several times.
     Args:
         n_transforms (int): number of transformations per sample
         all others: see ImageFolder
@@ -67,8 +73,11 @@ class ImageFolderMultiTransform(DatasetFolderMultiTransform):
 
     def __init__(self, root, transform=None, target_transform=None,
                  loader=default_loader, is_valid_file=None, n_transforms=c.n_transforms):
-        super(ImageFolderMultiTransform, self).__init__(root, loader, IMG_EXTENSIONS,
+        super(ImageFolderMultiTransform, self).__init__(root,
+                                                        loader,
+                                                        IMG_EXTENSIONS,
                                                         transform=transform,
                                                         target_transform=target_transform,
-                                                        is_valid_file=is_valid_file, n_transforms=n_transforms)
+                                                        is_valid_file=is_valid_file,
+                                                        n_transforms=n_transforms)
         self.imgs = self.samples

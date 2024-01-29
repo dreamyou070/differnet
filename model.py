@@ -4,7 +4,6 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from torchvision.models import alexnet
-
 import config as c
 from freia_funcs import permute_layer, glow_coupling_layer, F_fully_connected, ReversibleGraphNet, OutputNode, \
     InputNode, Node
@@ -13,25 +12,56 @@ WEIGHT_DIR = './weights'
 MODEL_DIR = './models'
 
 
-def nf_head(input_dim=c.n_feat):
+def nf_head(input_dim, n_coupling_blocks,
+            clamp_alpha, fc_internal, dropout):
     nodes = list()
-    nodes.append(InputNode(input_dim, name='input'))
-    for k in range(c.n_coupling_blocks):
-        nodes.append(Node([nodes[-1].out0], permute_layer, {'seed': k}, name=F'permute_{k}'))
-        nodes.append(Node([nodes[-1].out0], glow_coupling_layer,
-                          {'clamp': c.clamp_alpha, 'F_class': F_fully_connected,
-                           'F_args': {'internal_size': c.fc_internal, 'dropout': c.dropout}},
+    nodes.append(InputNode(input_dim,
+                           name='input'))
+    for k in range(n_coupling_blocks):
+        init_dim = nodes[-1].out0
+        print(f'node {k} init_dim: {init_dim}')
+        nodes.append(Node([nodes[-1].out0],
+                          permute_layer,
+                          {'seed': k},
+                          name=F'permute_{k}'))
+        nodes.append(Node([nodes[-1].out0],
+                          glow_coupling_layer,
+                          {'clamp': clamp_alpha,
+                           'F_class': F_fully_connected,
+                           'F_args': {'internal_size': fc_internal,
+                                      'dropout': dropout}},
                           name=F'fc_{k}'))
-    nodes.append(OutputNode([nodes[-1].out0], name='output'))
+    nodes.append(OutputNode([nodes[-1].out0],
+                            name='output'))
     coder = ReversibleGraphNet(nodes)
     return coder
 
 
 class DifferNet(nn.Module):
-    def __init__(self):
+    #model = DifferNet(n_scales=args.n_scales,  # 3
+    #                  n_feat=args.n_feat,  # 256 * 3
+    #                  n_coupling_blocks=args.n_coupling_blocks,  # 8
+    #                  clamp_alpha=args.clamp_alpha,  # 3
+    #                  fc_internal=args.fc_internal,  # 2048
+    #                  dropout=args.dropout)  # 0.0
+
+    def __init__(self,
+                 n_scales,
+                 n_feat,
+                 n_coupling_blocks,
+                 clamp_alpha,
+                 fc_internal,
+                 dropout):
         super(DifferNet, self).__init__()
+        # ------------------------------------------------------------------------------------------------------------
+        # use pretrained alexnet
         self.feature_extractor = alexnet(pretrained=True)
-        self.nf = nf_head()
+        self.nf = nf_head(input_dim=n_feat,                     # 256 * 3
+                          n_coupling_blocks=n_coupling_blocks,  # 8
+                          clamp_alpha=clamp_alpha,              # 3
+                          fc_internal=fc_internal,              # 2048
+                          dropout=dropout)                      # 0.0
+        self.n_scales = n_scales # 3
 
     def forward(self, x):
         y_cat = list()
