@@ -353,7 +353,7 @@ class ReversibleGraphNet(nn.Module):
         # Assign each node a unique ID
         self.node_list = node_list
         for i, n in enumerate(node_list):
-            print(f'id (0 ~ 17) : {i}}')
+            print(f'id (0 ~ 17) : {i}')
             n.id = i
 
         # ----------------------------------------------------------------------------------------------------
