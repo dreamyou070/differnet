@@ -27,7 +27,7 @@ class Score_Observer:
         print('{:s}: \t last: {:.4f} \t max: {:.4f} \t epoch_max: {:d}'.format(self.name, self.last, self.max_score,
                                                                                self.max_epoch))
 
-def main():
+def main(args):
 
     print(f' step 1. loading dataset')
     dataset_path = args.dataset_path
