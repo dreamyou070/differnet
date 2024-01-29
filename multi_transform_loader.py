@@ -7,16 +7,14 @@ from torchvision.transforms.functional import rotate
 import config as c
 
 
-def fixed_rotation(self, sample, degrees):
+def fixed_rotation(self, sample, degrees, args):
     cust_rot = lambda x: rotate(x, degrees, False, False, None)
     augmentative_transforms = [cust_rot]
-    if c.transf_brightness > 0.0 or c.transf_contrast > 0.0 or c.transf_saturation > 0.0:
+    if args.transf_brightness > 0.0 or args.transf_contrast > 0.0 or args.transf_saturation > 0.0:
         augmentative_transforms += [
-            transforms.ColorJitter(brightness=c.transf_brightness, contrast=c.transf_contrast,
-                                   saturation=c.transf_saturation)]
+            transforms.ColorJitter(brightness=args.transf_brightness, contrast=args.transf_contrast,saturation=args.transf_saturation)]
     tfs = [transforms.Resize(c.img_size)] + augmentative_transforms + [transforms.ToTensor(),
-                                                                       transforms.Normalize(c.norm_mean,
-                                                                                            c.norm_std)]
+                                                                       transforms.Normalize(args.norm_mean,args.norm_std)]
     return transforms.Compose(tfs)(sample)
 
 
@@ -27,10 +25,24 @@ class DatasetFolderMultiTransform(DatasetFolder):
         all others: see torchvision.datasets.DatasetFolder
     """
 
-    def __init__(self, root, loader, extensions=None, transform=None,
-                 target_transform=None, is_valid_file=None, n_transforms=1):
-        super(DatasetFolderMultiTransform, self).__init__(root, loader, extensions=extensions, transform=transform,
-                                                          target_transform=target_transform)
+    def __init__(self,
+                 root,
+                 loader,
+                 extensions=None,
+                 transform=None,
+                 target_transform=None,
+                 is_valid_file=None,
+                 n_transforms=1,
+                 transf_brightness=None,
+                 transf_contrast=None,
+                 transf_saturation=None
+                 ):
+        super(DatasetFolderMultiTransform, self).__init__(root,
+                                                          loader,
+                                                          extensions=extensions,
+                                                          transform=transform,
+                                                          target_transform=target_transform,
+                                                          )
         try:
             classes, class_to_idx = self.find_classes(self.root)
         except:
@@ -41,6 +53,10 @@ class DatasetFolderMultiTransform(DatasetFolder):
         self.n_transforms = n_transforms
         self.get_fixed = False  # set to true if the rotations should be fixed and regularly over 360 degrees
         self.fixed_degrees = [i * 360.0 / n_transforms for i in range(n_transforms)]
+
+        self.transf_brightness = transf_brightness
+        self.transf_contrast = transf_contrast
+        self.transf_saturation = transf_saturation
 
     def __getitem__(self, index):
 
@@ -71,13 +87,23 @@ class ImageFolderMultiTransform(DatasetFolderMultiTransform):
         all others: see ImageFolder
     """
 
-    def __init__(self, root, transform=None, target_transform=None,
-                 loader=default_loader, is_valid_file=None, n_transforms=c.n_transforms):
+    def __init__(self, root, transform=None,
+                 target_transform=None,
+                 loader=default_loader,
+                 is_valid_file=None,
+                 n_transforms=3,
+                 transf_brightness=None,
+                 transf_contrast=None,
+                 transf_saturation=None
+                 ):
         super(ImageFolderMultiTransform, self).__init__(root,
                                                         loader,
                                                         IMG_EXTENSIONS,
                                                         transform=transform,
                                                         target_transform=target_transform,
                                                         is_valid_file=is_valid_file,
-                                                        n_transforms=n_transforms)
+                                                        n_transforms=n_transforms,
+                                                        transf_brightness=transf_brightness,
+                                                        transf_contrast=transf_contrast,
+                                                        transf_saturation=transf_saturation)
         self.imgs = self.samples

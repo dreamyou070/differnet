@@ -37,6 +37,26 @@ def main(args):
                                         class_name,
                                         args.n_transforms,
                                         args.n_transforms_test,)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     args.batch_size_test = args.batch_size * args.n_transforms // args.n_transforms_test
     train_loader, test_loader = make_dataloaders(train_set, test_set, args.batch_size, args.batch_size_test)
 

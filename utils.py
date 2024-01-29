@@ -69,11 +69,17 @@ def load_datasets(dataset_path, class_name, args):
     transform_train = get_random_transforms(args)
     trainset = ImageFolderMultiTransform(data_dir_train,
                                          transform=transform_train,
-                                         n_transforms=args.n_transforms)
+                                         n_transforms=args.n_transforms,
+                                         transf_brightness=args.transf_brightness,
+                                         transf_contrast=args.transf_contrast,
+                                         transf_saturation=args.transf_saturation,)
     testset = ImageFolderMultiTransform(data_dir_test,
                                         transform=transform_train,
                                         target_transform=target_transform, # class index
-                                        n_transforms=args.n_transforms_test)
+                                        n_transforms=args.n_transforms_test,
+                                        transf_brightness=args.transf_brightness,
+                                        transf_contrast=args.transf_contrast,
+                                        transf_saturation=args.transf_saturation,)
     return trainset, testset
 
 
