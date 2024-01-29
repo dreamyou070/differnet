@@ -35,8 +35,7 @@ def main(args):
     args.img_dims = [3] + list(args.img_size)
     train_set, test_set = load_datasets(dataset_path,
                                         class_name,
-                                        args.n_transforms,
-                                        args.n_transforms_test,)
+                                        args)
 
 
 
