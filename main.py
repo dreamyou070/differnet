@@ -107,11 +107,12 @@ def main(args):
 
 
 if __name__ == '__main__':
-    args = argparse.ArgumentParser()
-    args.add_argument('--dataset_path', type=str, default='dummy_dataset')
-    args.add_argument('--class_name', type=str, default='dummy_class')
-    args.add_argument('--device', type=str, default='cuda')
-    args.add_argument('--meta_epochs', type=int, default=24)
-    args.add_argument('--sub_epochs', type=int, default=8)
-    args.add_argument('--hide_tqdm_bar', action='store_true')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset_path', type=str, default='dummy_dataset')
+    parser.add_argument('--class_name', type=str, default='dummy_class')
+    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--meta_epochs', type=int, default=24)
+    parser.add_argument('--sub_epochs', type=int, default=8)
+    parser.add_argument('--hide_tqdm_bar', action='store_true')
+    args = parser.parse_args()
     main(args)
