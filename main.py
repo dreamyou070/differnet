@@ -113,5 +113,5 @@ if __name__ == '__main__':
     args.add_argument('--device', type=str, default='cuda')
     args.add_argument('--meta_epochs', type=int, default=24)
     args.add_argument('--sub_epochs', type=int, default=8)
-    args.add_argument('--hide_tqdm_bar', action='store_ture')
+    args.add_argument('--hide_tqdm_bar', action='store_true')
     main(args)
