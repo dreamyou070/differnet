@@ -372,13 +372,13 @@ class ReversibleGraphNet(nn.Module):
         # ----------------------------------------------------------------------------------------------------
         # [3]
         self.indexed_ops = self.ops_to_indexed(ops)
-
         self.module_list = nn.ModuleList([n.module for n in node_list])
-        print(f'len(self.module_list) (18)  : {len(self.module_list)}')
+
 
         # ----------------------------------------------------------------------------------------------------
         # [4] NF variable training
         self.variable_list = [Variable(requires_grad=True) for v in variables]
+        print(f'variable_list (17) : {self.variable_list}')
 
         # Find out the order of operations for reverse calculations
         ops_rev = []
