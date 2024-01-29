@@ -18,12 +18,10 @@ def nf_head(input_dim, n_coupling_blocks,
     nodes.append(InputNode(input_dim,
                            name='input'))
     for k in range(n_coupling_blocks):
-        init_dim = nodes[-1].out0
         nodes.append(Node([nodes[-1].out0], # input
                           permute_layer,
                           {'seed': k},
                           name=F'permute_{k}'))
-        init_dim = nodes[-1].out0
         nodes.append(Node([nodes[-1].out0],
                           glow_coupling_layer,
                           {'clamp': clamp_alpha,

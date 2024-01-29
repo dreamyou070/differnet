@@ -183,7 +183,7 @@ class Node:
         for i in range(255):
             # from 0 to 254, the ascii characters
             # self.out0 = (self, 0)
-            exec('self.out{0} = (self, {0})'.format(i))
+            exec(f'self.out{i} = (self, {i})')
 
     def build_modules(self, verbose=VERBOSE):
 
@@ -193,7 +193,9 @@ class Node:
         '''
 
         if not self.input_dims:  # Only do it if this hasn't been computed yet
-
+            # self.build_modules()[0]
+            for n, c in self.inputs :
+                print(f'c (0) : {c}')
             self.input_dims = [n.build_modules(verbose=verbose)[c] for n, c in self.inputs]
             try:
                 self.module = self.module_type(self.input_dims, **self.module_args) # 768
@@ -274,7 +276,7 @@ class InputNode(Node):
         self.computed_rev = None
         self.n_outputs = 1
         self.input_vars = []
-        self.out0 = (self, 0)
+        self.out0 = (self, 0) # self, 0
 
     def build_modules(self, verbose=VERBOSE):
         return [self.data.shape]
