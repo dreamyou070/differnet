@@ -1,4 +1,4 @@
-'''This Code is based on the FrEIA Framework, source: https://github.com/VLL-HD/FrEIA
+['''This Code is based on the FrEIA Framework, source: https://github.com/VLL-HD/FrEIA
 It is a assembly of the necessary modules/functions from FrEIA that are needed for our purposes.'''
 import torch
 import torch.nn as nn
@@ -195,10 +195,8 @@ class Node:
         if not self.input_dims:  # Only do it if this hasn't been computed yet
 
             self.input_dims = [n.build_modules(verbose=verbose)[c] for n, c in self.inputs]
-            print(f' *** {self.name} self.input_dims : {self.input_dims}')
             try:
-                self.module = self.module_type(self.input_dims,
-                                               **self.module_args)
+                self.module = self.module_type(self.input_dims, **self.module_args) # 768
             except Exception as e:
                 print('Error in node %s' % (self.name))
                 raise e
@@ -210,8 +208,6 @@ class Node:
                 print()
             self.output_dims = self.module.output_dims(self.input_dims)
             self.n_outputs = len(self.output_dims)
-
-        print(f'build_modules: {self.name} {self.output_dims}')
         return self.output_dims
 
     def run_forward(self, op_list):
@@ -234,10 +230,13 @@ class Node:
 
             # All outputs could now be computed
             self.computed = [(self.id, i) for i in range(self.n_outputs)]
+            # ----------------------------------------------------------------------------------------------------------
+            # append on input op_list
             op_list.append((self.id, self.input_vars, self.computed))
-
+        # -------------------------------------------------------------------------------------------------------------
         # Return the variables you have computed (this happens mulitple times
         # without recomputing if called repeatedly)
+        # self.computed
         return self.computed
 
     def run_backward(self, op_list):
@@ -368,11 +367,13 @@ class ReversibleGraphNet(nn.Module):
 
         # ----------------------------------------------------------------------------------------------------
         # [2] create list of Pytorch variables that are used ( total 17 length )
+        # set.union = 합집합
         variables = set()
         for o in ops:
             scaling = o[1]
             shift = o[2]
             # ([(16, 0)],[(17, 0), (17, 1)])
+
             variables = variables.union(set(o[1] + o[2]))
         self.variables_ind = list(variables)
 
@@ -385,9 +386,12 @@ class ReversibleGraphNet(nn.Module):
         # ----------------------------------------------------------------------------------------------------
         # [4] NF variable training
         self.variable_list = [Variable(requires_grad=True) for v in variables]
+        for v in variables :
+            print(f'v : {v}')
         print(f'variable_list (17) : {len(self.variable_list)}')
 
-        # Find out the order of operations for reverse calculations
+        # ----------------------------------------------------------------------------------------------------
+        # [5] reverse calculation : Find out the order of operations for reverse calculations
         ops_rev = []
         for i in self.ind_in:
             node_list[i].run_backward(ops_rev)
@@ -397,15 +401,12 @@ class ReversibleGraphNet(nn.Module):
         '''Helper function to translate the list of variables (origin ID, channel),
         to variable IDs.'''
         result = []
-
         for o in ops:
             try:
                 vars_in = [self.variables_ind.index(v) for v in o[1]]
             except ValueError:
                 vars_in = -1
-
             vars_out = [self.variables_ind.index(v) for v in o[2]]
-
             # Collect input/output nodes in separate lists, but don't add to
             # indexed ops
             if o[0] in self.ind_out:
@@ -414,9 +415,7 @@ class ReversibleGraphNet(nn.Module):
             if o[0] in self.ind_in:
                 self.input_vars.append(self.variables_ind.index(o[1][0]))
                 continue
-
             result.append((o[0], vars_in, vars_out))
-
         # Sort input/output variables so they correspond to initial node list
         # order
         self.return_vars.sort(key=lambda i: self.variables_ind[i][0])
@@ -495,4 +494,4 @@ class ReversibleGraphNet(nn.Module):
                 raise RuntimeError("Are you sure all used Nodes are in the "
                                    "Node list?")
 
-        return jacobian
+        return jacobian]
