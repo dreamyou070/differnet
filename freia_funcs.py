@@ -353,14 +353,14 @@ class ReversibleGraphNet(nn.Module):
             n.id = i # n.id = 0, ..., 9
 
         # ----------------------------------------------------------------------------------------------------
-        # Recursively build the nodes nn.Modules and determine order of operations
+        # Recursively build the nodes nn.Modules and determine order of operations : 17 operations
         ops = []
         for i in self.ind_out : # self.ind_out = [17
-            # change last output node
+            print(f'{i} node operation')
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
         print(f'len of operations : {len(ops)}')
-            
+
 
 
 
