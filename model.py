@@ -62,12 +62,13 @@ class DifferNet(nn.Module):
                           fc_internal=fc_internal,              # 2048
                           dropout=dropout)                      # 0.0
         self.n_scales = n_scales # 3
+        self.img_size = (448, 448)
 
     def forward(self, x):
         y_cat = list()
 
         for s in range(self.n_scales):
-            x_scaled = F.interpolate(x, size=c.img_size[0] // (2 ** s)) if s > 0 else x
+            x_scaled = F.interpolate(x, size=self.img_size[0] // (2 ** s)) if s > 0 else x
             feat_s = self.feature_extractor.features(x_scaled)
             y_cat.append(torch.mean(feat_s, dim=(2, 3)))
 
