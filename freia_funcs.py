@@ -378,7 +378,7 @@ class ReversibleGraphNet(nn.Module):
         # ----------------------------------------------------------------------------------------------------
         # [4] NF variable training
         self.variable_list = [Variable(requires_grad=True) for v in variables]
-        print(f'variable_list (17) : {self.variable_list}')
+        print(f'variable_list (17) : {len(self.variable_list)}')
 
         # Find out the order of operations for reverse calculations
         ops_rev = []
