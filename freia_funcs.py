@@ -325,8 +325,7 @@ class ReversibleGraphNet(nn.Module):
                  verbose=False):
 
         super(ReversibleGraphNet, self).__init__()
-        print(f' reversible GraphNet, len of node_list : {len(node_list)}')
-        print(f'ind_in : {ind_in} ind_out : {ind_out}')
+
         if ind_in is not None:
             if isinstance(ind_in, int):
                 self.ind_in = list([ind_in])
@@ -336,13 +335,13 @@ class ReversibleGraphNet(nn.Module):
             # ind_in = [0]
             self.ind_in = [i for i in range(len(node_list)) if isinstance(node_list[i], InputNode)]
             assert len(self.ind_in) > 0, "No input nodes specified."
+
         if ind_out is not None:
             if isinstance(ind_out, int):
                 self.ind_out = list([ind_out])
             else:
                 self.ind_out = ind_out
         else:
-            # ind_out = [9]
             self.ind_out = [i for i in range(len(node_list)) if isinstance(node_list[i], OutputNode)]
             assert len(self.ind_out) > 0, "No output nodes specified."
         # total 18 nodes, from 0 ~ 17
@@ -350,17 +349,20 @@ class ReversibleGraphNet(nn.Module):
         self.return_vars = []
         self.input_vars = []
 
+        # ----------------------------------------------------------------------------------------------------
         # Assign each node a unique ID
         self.node_list = node_list
         for i, n in enumerate(node_list):
-            n.id = i # n.id = 0, ..., 9
+            print(f'id (0 ~ 17) : {i}}')
+            n.id = i
 
         # ----------------------------------------------------------------------------------------------------
         # Recursively build the nodes nn.Modules and determine order of operations : 17 operations
         ops = []
         for i in self.ind_out : # self.ind_out = [17
             output_node = node_list[i]
-            # one time, and 17 iteration
+            # ------------------------------------------------------------------------------------------------
+            # build reverse module
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
 
