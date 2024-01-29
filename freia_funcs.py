@@ -356,20 +356,16 @@ class ReversibleGraphNet(nn.Module):
         # Recursively build the nodes nn.Modules and determine order of operations : 17 operations
         ops = []
         for i in self.ind_out : # self.ind_out = [17
-            print(f'{i} node operation')
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
-        print(f'len of operations : {len(ops)}')
-
-
-
-
-
 
         # ----------------------------------------------------------------------------------------------------
         # create list of Pytorch variables that are used
         variables = set()
         for o in ops:
+            scaling = o[1]
+            shift = o[2]
+            print(f'o[1] = {o[1]} | o[2] = {o[2]}')
             variables = variables.union(set(o[1] + o[2]))
         self.variables_ind = list(variables)
 
