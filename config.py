@@ -1,14 +1,3 @@
-
-# device settings
-device = 'cuda' # or 'cpu'
-import torch
-torch.cuda.set_device(0)
-
-# data settings
-
-class_name = "dummy_class"
-modelname = "dummy_test"
-
 img_size = (448, 448)
 img_dims = [3] + list(img_size)
 
@@ -36,11 +25,10 @@ batch_size_test = batch_size * n_transforms // n_transforms_test
 
 # total epochs = meta_epochs * sub_epochs
 # evaluation after <sub_epochs> epochs
-meta_epochs = 24
+
 sub_epochs = 8
 
 # output settings
 verbose = True
 grad_map_viz = False
-hide_tqdm_bar = True
 save_model = True

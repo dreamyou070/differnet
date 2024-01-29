@@ -9,27 +9,6 @@ from model import DifferNet, save_model, save_weights
 from utils import *
 
 
-class Score_Observer:
-    '''Keeps an eye on the current and highest score so far'''
-
-    def __init__(self, name):
-        self.name = name
-        self.max_epoch = 0
-        self.max_score = None
-        self.last = None
-
-    def update(self, score, epoch, print_score=False):
-        self.last = score
-        if epoch == 0 or score > self.max_score:
-            self.max_score = score
-            self.max_epoch = epoch
-        if print_score:
-            self.print_score()
-
-    def print_score(self):
-        print('{:s}: \t last: {:.4f} \t max: {:.4f} \t epoch_max: {:d}'.format(self.name, self.last, self.max_score,
-                                                                               self.max_epoch))
-
 
 def train(train_loader, test_loader):
     model = DifferNet()
