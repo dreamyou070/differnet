@@ -186,13 +186,14 @@ class Node:
             exec('self.out{0} = (self, {0})'.format(i))
 
     def build_modules(self, verbose=VERBOSE):
-        # total 17 number
+
         ''' Returns a list with the dimension of each output of this node,
         recursively calling build_modules of the nodes connected to the input.
         Use this information to initialize the pytorch nn.Module of this node.
         '''
 
         if not self.input_dims:  # Only do it if this hasn't been computed yet
+            print(f'not input dims: {self.name}')
             self.input_dims = [n.build_modules(verbose=verbose)[c] for n, c in self.inputs]
             try:
                 self.module = self.module_type(self.input_dims,
@@ -206,9 +207,9 @@ class Node:
                 for d, (n, c) in zip(self.input_dims, self.inputs):
                     print("\t Output #%i of node %s:" % (c, n.name), d)
                 print()
-
             self.output_dims = self.module.output_dims(self.input_dims)
             self.n_outputs = len(self.output_dims)
+
         print(f'build_modules: {self.name} {self.output_dims}')
         return self.output_dims
 
@@ -318,12 +319,14 @@ class ReversibleGraphNet(nn.Module):
     additional option 'rev', whith which the net can be computed in reverse.'''
 
     def __init__(self,
-                 node_list, ind_in=None, ind_out=None, verbose=False):
-        '''node_list should be a list of all nodes involved, and ind_in,
-        ind_out are the indexes of the special nodes InputNode and OutputNode
-        in this list.'''
+                 node_list,
+                 ind_in=None,
+                 ind_out=None,
+                 verbose=False):
+
         super(ReversibleGraphNet, self).__init__()
-        # Gather lists of input and output nodes
+        print(f' reversible GraphNet, len of node_list : {len(node_list)}')
+        print(f'ind_in : {ind_in} ind_out : {ind_out}')
         if ind_in is not None:
             if isinstance(ind_in, int):
                 self.ind_in = list([ind_in])
@@ -357,7 +360,7 @@ class ReversibleGraphNet(nn.Module):
         ops = []
         for i in self.ind_out : # self.ind_out = [17
             output_node = node_list[i]
-            print(f'output_node = {output_node.__class__.__name__}')
+            # one time, and 17 iteration
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
 
