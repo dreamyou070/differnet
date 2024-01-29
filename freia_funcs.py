@@ -315,12 +315,12 @@ class ReversibleGraphNet(nn.Module):
     torch.nn.Module and supports the same methods. The forward method has an
     additional option 'rev', whith which the net can be computed in reverse.'''
 
-    def __init__(self, node_list, ind_in=None, ind_out=None, verbose=False):
+    def __init__(self,
+                 node_list, ind_in=None, ind_out=None, verbose=False):
         '''node_list should be a list of all nodes involved, and ind_in,
         ind_out are the indexes of the special nodes InputNode and OutputNode
         in this list.'''
         super(ReversibleGraphNet, self).__init__()
-
         # Gather lists of input and output nodes
         if ind_in is not None:
             if isinstance(ind_in, int):
@@ -328,8 +328,8 @@ class ReversibleGraphNet(nn.Module):
             else:
                 self.ind_in = ind_in
         else:
-            self.ind_in = [i for i in range(len(node_list))
-                           if isinstance(node_list[i], InputNode)]
+            # ind_in = [0]
+            self.ind_in = [i for i in range(len(node_list)) if isinstance(node_list[i], InputNode)]
             assert len(self.ind_in) > 0, "No input nodes specified."
         if ind_out is not None:
             if isinstance(ind_out, int):
@@ -337,6 +337,7 @@ class ReversibleGraphNet(nn.Module):
             else:
                 self.ind_out = ind_out
         else:
+            # ind_out = [9]
             self.ind_out = [i for i in range(len(node_list))
                             if isinstance(node_list[i], OutputNode)]
             assert len(self.ind_out) > 0, "No output nodes specified."
@@ -347,10 +348,12 @@ class ReversibleGraphNet(nn.Module):
         # Assign each node a unique ID
         self.node_list = node_list
         for i, n in enumerate(node_list):
-            n.id = i
+            n.id = i # n.id = 0, ..., 9
 
         # Recursively build the nodes nn.Modules and determine order of
         # operations
+        print(f'nf head, self.ind_in  (1) : {len(self.ind_in)}')
+        print(f'nf head, self.ind_out (1) : {len(self.ind_out)}')
         ops = []
         for i in self.ind_out:
             node_list[i].build_modules(verbose=verbose)
@@ -405,6 +408,7 @@ class ReversibleGraphNet(nn.Module):
         return result
 
     def forward(self, x, rev=False):
+        # x = [Batch=96, 758]
         '''Forward or backward computation of the whole net.'''
         if rev:
             use_list = self.indexed_ops_rev
@@ -417,15 +421,17 @@ class ReversibleGraphNet(nn.Module):
             assert len(x) == len(input_vars), (
                 f"Got list of {len(x)} input tensors for "
                 f"{'inverse' if rev else 'forward'} pass, but expected "
-                f"{len(input_vars)}."
-            )
+                f"{len(input_vars)}.")
+
             for i in range(len(input_vars)):
                 self.variable_list[input_vars[i]] = x[i]
         else:
+            print(f'type of input to ReversibleNet, x (torch) : {type(x)}')
             assert len(input_vars) == 1, (f"Got single input tensor for "
                                           f"{'inverse' if rev else 'forward'} "
                                           f"pass, but expected list of "
                                           f"{len(input_vars)}.")
+            #
             self.variable_list[input_vars[0]] = x
 
         for o in use_list:

@@ -33,18 +33,15 @@ def nf_head(input_dim, n_coupling_blocks,
                           name=F'fc_{k}'))
     nodes.append(OutputNode([nodes[-1].out0],
                             name='output'))
-    coder = ReversibleGraphNet(nodes)
+    coder = ReversibleGraphNet(node_list = nodes,
+                               ind_in=None,
+                               ind_out=None,
+                               verbose=False)
+
     return coder
 
 
 class DifferNet(nn.Module):
-    #model = DifferNet(n_scales=args.n_scales,  # 3
-    #                  n_feat=args.n_feat,  # 256 * 3
-    #                  n_coupling_blocks=args.n_coupling_blocks,  # 8
-    #                  clamp_alpha=args.clamp_alpha,  # 3
-    #                  fc_internal=args.fc_internal,  # 2048
-    #                  dropout=args.dropout)  # 0.0
-
     def __init__(self,
                  n_scales,
                  n_feat,
