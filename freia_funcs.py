@@ -186,7 +186,7 @@ class Node:
             exec('self.out{0} = (self, {0})'.format(i))
 
     def build_modules(self, verbose=VERBOSE):
-        print(f'out node build modules ... ')
+        # total 17 number
         ''' Returns a list with the dimension of each output of this node,
         recursively calling build_modules of the nodes connected to the input.
         Use this information to initialize the pytorch nn.Module of this node.
@@ -209,7 +209,7 @@ class Node:
 
             self.output_dims = self.module.output_dims(self.input_dims)
             self.n_outputs = len(self.output_dims)
-
+        print(f'build_modules: {self.name} {self.output_dims}')
         return self.output_dims
 
     def run_forward(self, op_list):
@@ -356,6 +356,8 @@ class ReversibleGraphNet(nn.Module):
         # Recursively build the nodes nn.Modules and determine order of operations : 17 operations
         ops = []
         for i in self.ind_out : # self.ind_out = [17
+            output_node = node_list[i]
+            print(f'output_node = {output_node.__class__.__name__}')
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
 
