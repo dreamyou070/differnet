@@ -26,9 +26,5 @@ batch_size_test = batch_size * n_transforms // n_transforms_test
 # total epochs = meta_epochs * sub_epochs
 # evaluation after <sub_epochs> epochs
 
-sub_epochs = 8
-
-# output settings
-verbose = True
 grad_map_viz = False
 save_model = True

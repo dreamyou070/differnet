@@ -54,13 +54,17 @@ def main(args):
             train_loss = list()
             for i, data in enumerate(tqdm(train_loader, disable=args.hide_tqdm_bar)):
                 optimizer.zero_grad()
+                # 1) raw data
                 inputs, labels = data
                 inputs, labels = inputs.to(args.device), labels.to(args.device)
+                print(f'label: {labels} | input shape: {inputs.shape}')
                 inputs = inputs.view(-1, *inputs.shape[-3:])
+                print(f'after view, label: {labels} | input shape: {inputs.shape}')
 
-                # TODO inspect
-                # inputs += torch.randn(*inputs.shape).cuda() * c.add_img_noise
+                # 2) make anomal data
+                inputs += torch.randn(*inputs.shape).cuda()
                 z = model(inputs)
+
                 #loss = get_loss(z, model.nf.jacobian(run_forward=False))
                 #train_loss.append(t2np(loss))
                 #loss.backward()
