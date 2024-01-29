@@ -360,18 +360,24 @@ class ReversibleGraphNet(nn.Module):
             node_list[i].run_forward(ops)
 
         # ----------------------------------------------------------------------------------------------------
-        # create list of Pytorch variables that are used
+        # [2] create list of Pytorch variables that are used ( total 17 length )
         variables = set()
         for o in ops:
             scaling = o[1]
             shift = o[2]
-            print(f'o[1] = {o[1]} | o[2] = {o[2]}')
+            # ([(16, 0)],[(17, 0), (17, 1)])
             variables = variables.union(set(o[1] + o[2]))
         self.variables_ind = list(variables)
 
+        # ----------------------------------------------------------------------------------------------------
+        # [3]
         self.indexed_ops = self.ops_to_indexed(ops)
 
         self.module_list = nn.ModuleList([n.module for n in node_list])
+        print(f'len(self.module_list) (18)  : {len(self.module_list)}')
+
+        # ----------------------------------------------------------------------------------------------------
+        # [4] NF variable training
         self.variable_list = [Variable(requires_grad=True) for v in variables]
 
         # Find out the order of operations for reverse calculations
