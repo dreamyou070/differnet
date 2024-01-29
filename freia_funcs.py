@@ -213,10 +213,12 @@ class Node:
         return self.output_dims
 
     def run_forward(self, op_list):
-        '''Determine the order of operations needed to reach this node. Calls
+        '''
+        Determine the order of operations needed to reach this node. Calls
         run_forward of parent nodes recursively. Each operation is appended to
         the global list op_list, in the form (node ID, input variable IDs,
-        output variable IDs)'''
+        output variable IDs)
+        '''
 
         if not self.computed:
 
@@ -338,9 +340,9 @@ class ReversibleGraphNet(nn.Module):
                 self.ind_out = ind_out
         else:
             # ind_out = [9]
-            self.ind_out = [i for i in range(len(node_list))
-                            if isinstance(node_list[i], OutputNode)]
+            self.ind_out = [i for i in range(len(node_list)) if isinstance(node_list[i], OutputNode)]
             assert len(self.ind_out) > 0, "No output nodes specified."
+        # total 18 nodes, from 0 ~ 17
 
         self.return_vars = []
         self.input_vars = []
@@ -350,14 +352,21 @@ class ReversibleGraphNet(nn.Module):
         for i, n in enumerate(node_list):
             n.id = i # n.id = 0, ..., 9
 
-        # Recursively build the nodes nn.Modules and determine order of
-        # operations
+        # ----------------------------------------------------------------------------------------------------
+        # Recursively build the nodes nn.Modules and determine order of operations
         ops = []
-        for i in self.ind_out:
-            print(f'i = {i} (because len of ind_out = 1 )')
+        for i in self.ind_out : # self.ind_out = [17
+            # change last output node
             node_list[i].build_modules(verbose=verbose) # change out node build_modules
             node_list[i].run_forward(ops)
+        print(f'len of operations : {len(ops)}')
+            
 
+
+
+
+
+        # ----------------------------------------------------------------------------------------------------
         # create list of Pytorch variables that are used
         variables = set()
         for o in ops:
