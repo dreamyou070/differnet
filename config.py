@@ -1,5 +1,3 @@
-'''This file configures the training procedure because handling arguments in every single function is so exhaustive for
-research purposes. Don't try this code if you are a software engineer.'''
 
 # device settings
 device = 'cuda' # or 'cpu'
@@ -7,7 +5,7 @@ import torch
 torch.cuda.set_device(0)
 
 # data settings
-dataset_path = "dummy_dataset"
+
 class_name = "dummy_class"
 modelname = "dummy_test"
 
